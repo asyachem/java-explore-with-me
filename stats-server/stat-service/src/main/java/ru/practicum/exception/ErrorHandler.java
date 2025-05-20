@@ -14,7 +14,6 @@ import java.util.HashMap;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
