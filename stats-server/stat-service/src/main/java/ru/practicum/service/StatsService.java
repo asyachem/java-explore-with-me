@@ -1,4 +1,5 @@
 package ru.practicum.service;
+import java.net.URLDecoder;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import ru.practicum.dto.dto.ViewStatsDto;
 import ru.practicum.mapper.EndpointHitMapper;
 import ru.practicum.repository.StatsRepository;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -40,9 +42,10 @@ public class StatsService {
 
   private LocalDateTime parseDateTime(String dateTime) {
     try {
-      return LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+      String decoded = URLDecoder.decode(dateTime, StandardCharsets.UTF_8);
+      return LocalDateTime.parse(decoded, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException("Неверный формат даты. Используйте формат 'гггг-мм-дд чч:мм:сс'");
+      throw new IllegalArgumentException("Неверный формат даты. Используйте формат 'yyyy-MM-dd HH:mm:ss'");
     }
   }
 }
