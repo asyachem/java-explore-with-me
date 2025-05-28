@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.NewUserDto;
 import ru.practicum.dto.UserDto;
-import ru.practicum.service.AdminUserService;
+import ru.practicum.service.UserService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 public class AdminUserController {
-    private final AdminUserService userService;
+    private final UserService userService;
 
     @GetMapping
     public List<UserDto> getUsers(

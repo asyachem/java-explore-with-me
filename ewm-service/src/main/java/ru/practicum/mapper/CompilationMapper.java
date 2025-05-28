@@ -1,31 +1,21 @@
 package ru.practicum.mapper;
 
-import lombok.RequiredArgsConstructor;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 import ru.practicum.dto.CompilationDto;
-import ru.practicum.dto.EventShortDto;
 import ru.practicum.model.Compilation;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import org.mapstruct.Mapper;
+
 
 @Component
-@RequiredArgsConstructor
-public class CompilationMapper {
+@Mapper(componentModel = "spring", uses = {EventMapper.class})
+public interface CompilationMapper {
 
-    private final EventMapper eventMapper;
+    CompilationMapper INSTANCE = Mappers.getMapper(CompilationMapper.class);
 
-    public CompilationDto toDto(Compilation compilation) {
-        CompilationDto dto = new CompilationDto();
-        dto.setId(compilation.getId());
-        dto.setTitle(compilation.getTitle());
-        dto.setPinned(compilation.isPinned());
+    CompilationDto toDto(Compilation compilation);
 
-        List<EventShortDto> events = compilation.getEvents().stream()
-                .map(eventMapper::toShortDto)
-                .collect(Collectors.toList());
-
-        dto.setEvents(events);
-        return dto;
-    }
+    List<CompilationDto> toDtoList(List<Compilation> compilations);
 }

@@ -3,7 +3,7 @@ package ru.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.CompilationDto;
-import ru.practicum.service.PublicCompilationsService;
+import ru.practicum.service.CompilationService;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
 @RequestMapping("/compilations")
 @RequiredArgsConstructor
 public class PublicCompilationsController {
-    private final PublicCompilationsService compilationService;
+    private final CompilationService compilationService;
 
     @GetMapping
     public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,

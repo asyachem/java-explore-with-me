@@ -20,6 +20,6 @@ public class EventFullDto {
     private String publishedOn;
     private UserShortDto initiator;
     private CategoryDto category;
-    private int views = 0;
-    private int confirmedRequests = 0;
+    private int views;
+    private int confirmedRequests;
 }

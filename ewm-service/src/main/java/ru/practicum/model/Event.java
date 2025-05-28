@@ -55,7 +55,7 @@ public class Event {
     private LocalDateTime publishedOn;
 
     @Column(name = "confirmed_requests")
-    private int confirmedRequests = 0;
+    private int confirmedRequests;
 
-    private int views = 0;
+    private int views;
 }

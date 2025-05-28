@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AdminUserService {
+public class UserService {
     private final UserRepository userRepository;
 
     private final UserMapper userMapper;
@@ -26,7 +26,7 @@ public class AdminUserService {
         Pageable pageable = PageRequest.of(from / size, size);
         List<User> users = (ids == null || ids.isEmpty())
                 ? userRepository.findAll(pageable).getContent()
-                : userRepository.findAllByIdIn(ids, pageable);
+                : userRepository.findByIdIn(ids, pageable);
         return users.stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());

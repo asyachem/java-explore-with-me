@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.UpdateEventAdminRequest;
-import ru.practicum.service.AdminEventService;
+import ru.practicum.service.EventService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminEventController {
 
-    private final AdminEventService adminEventService;
+    private final EventService eventService;
 
     @GetMapping
     public List<EventFullDto> getEvents(@RequestParam(required = false) List<Long> users,
@@ -24,12 +24,12 @@ public class AdminEventController {
                                         @RequestParam(required = false) String rangeEnd,
                                         @RequestParam(defaultValue = "0") int from,
                                         @RequestParam(defaultValue = "10") int size) {
-        return adminEventService.getEvents(users, states, categories, rangeStart, rangeEnd, from, size);
+        return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
                                     @Valid @RequestBody UpdateEventAdminRequest request) {
-        return adminEventService.updateEvent(eventId, request);
+        return eventService.updateEventByAdmin(eventId, request);
     }
 }

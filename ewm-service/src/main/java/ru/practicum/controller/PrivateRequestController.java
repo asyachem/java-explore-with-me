@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.ParticipationRequestDto;
-import ru.practicum.service.PrivateRequestService;
+import ru.practicum.service.RequestService;
 
 import java.util.List;
 
@@ -13,23 +13,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PrivateRequestController {
 
-    private final PrivateRequestService privateRequestService;
+    private final RequestService requestService;
 
     @GetMapping
     public List<ParticipationRequestDto> getUserRequests(@PathVariable Long userId) {
-        return privateRequestService.getUserRequests(userId);
+        return requestService.getUserRequests(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createRequest(@PathVariable Long userId,
                                                  @RequestParam Long eventId) {
-        return privateRequestService.createRequest(userId, eventId);
+        return requestService.createRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
     public ParticipationRequestDto cancelRequest(@PathVariable Long userId,
                                                  @PathVariable Long requestId) {
-        return privateRequestService.cancelRequest(userId, requestId);
+        return requestService.cancelRequest(userId, requestId);
     }
 }

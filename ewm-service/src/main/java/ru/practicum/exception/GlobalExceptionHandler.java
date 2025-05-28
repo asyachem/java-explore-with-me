@@ -18,4 +18,26 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiError> handleBadRequestException(BadRequestException ex) {
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.BAD_REQUEST.name());
+        apiError.setReason("Incorrectly made request.");
+        apiError.setMessage(ex.getMessage());
+        apiError.setTimestamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> handleConflictException(ConflictException ex) {
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.CONFLICT.name());
+        apiError.setReason("For the requested operation the conditions are not met.");
+        apiError.setMessage(ex.getMessage());
+        apiError.setTimestamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
 }
