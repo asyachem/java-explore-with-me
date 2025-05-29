@@ -334,7 +334,6 @@ public class EventService {
                                 .findFirst()
                                 .map(ViewStatsDto::getHits)
                                 .orElse(0L);
-                        
                         dto.setViews((int) (views + globalViews));
                     } else {
                         dto.setViews((int) globalViews);
