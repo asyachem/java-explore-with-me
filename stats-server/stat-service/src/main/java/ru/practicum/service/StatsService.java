@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -27,12 +28,13 @@ public class StatsService {
   }
 
   public List<ViewStatsDto> getStats(String start, String end, List<String> uris, boolean unique) {
-    if (start == null || end == null) {
-      throw new BadRequestException("Параметры start и end обязательны");
-    }
+    LocalDateTime startDate = (start != null)
+            ? parseDateTime(start)
+            : LocalDateTime.of(2000, 1, 1, 0, 0); // взяла самую позднюю дату
 
-    LocalDateTime startDate = parseDateTime(start);
-    LocalDateTime endDate = parseDateTime(end);
+    LocalDateTime endDate = (end != null)
+            ? parseDateTime(end)
+            : LocalDateTime.now();
 
     if (startDate.isAfter(endDate)) {
       throw new BadRequestException("Дата начала не может быть позже даты конца");
@@ -40,10 +42,16 @@ public class StatsService {
 
     List<ViewStatsDto> dtos;
 
-    if (uris != null && uris.size() == 1 && "/events".equals(uris.get(0))) {
-      dtos = unique ? statsRepository.getStatsUniqueForAllEvents(startDate, endDate) : statsRepository.getStatsForAllEvents(startDate, endDate);
+    if (Objects.equals(uris.getFirst(), "/events")) {
+      dtos = statsRepository.getAllStatsForEventsWithoutTime();
+    } else if (uris.size() == 1 && "/events".equals(uris.get(0))) {
+      dtos = unique
+              ? statsRepository.getStatsUniqueForAllEvents(startDate, endDate)
+              : statsRepository.getStatsForAllEvents(startDate, endDate);
     } else {
-      dtos = unique ? statsRepository.getStatsUnique(startDate, endDate, uris) : statsRepository.getStats(startDate, endDate, uris);
+      dtos = unique
+              ? statsRepository.getStatsUnique(startDate, endDate, uris)
+              : statsRepository.getStats(startDate, endDate, uris);
     }
 
     return dtos;

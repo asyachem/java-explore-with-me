@@ -305,6 +305,15 @@ public class EventService {
 
         Map<Long, Long> confirmedRequests = getConfirmedRequests(events);
 
+        List<ViewStatsDto> globalStats = statClient.getStats(
+                start.format(formatter),
+                LocalDateTime.now().format(formatter),
+                List.of("/events"),
+                false
+        );
+
+        long globalViews = globalStats.isEmpty() ? 0 : globalStats.get(0).getHits();
+
         return events.stream()
                 .map(event -> {
                     EventShortDto dto = eventMapper.toShortDto(event);
@@ -325,10 +334,10 @@ public class EventService {
                                 .findFirst()
                                 .map(ViewStatsDto::getHits)
                                 .orElse(0L);
-
-                        dto.setViews((int) views);
+                        
+                        dto.setViews((int) (views + globalViews));
                     } else {
-                        dto.setViews(0);
+                        dto.setViews((int) globalViews);
                     }
 
                     return dto;
