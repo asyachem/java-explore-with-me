@@ -15,12 +15,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class StatsService {
   private final StatsRepository statsRepository;
+  private static final LocalDateTime UNIX_EPOCH_START = LocalDateTime.of(1970, 1, 1, 0, 0);
 
   @Transactional
   public void saveHit(EndpointHitDto hitDto) {
@@ -30,7 +30,7 @@ public class StatsService {
   public List<ViewStatsDto> getStats(String start, String end, List<String> uris, boolean unique) {
     LocalDateTime startDate = (start != null)
             ? parseDateTime(start)
-            : LocalDateTime.of(2000, 1, 1, 0, 0); // взяла самую позднюю дату
+            : UNIX_EPOCH_START; // взяла самую позднюю дату
 
     LocalDateTime endDate = (end != null)
             ? parseDateTime(end)
@@ -42,9 +42,9 @@ public class StatsService {
 
     List<ViewStatsDto> dtos;
 
-    if (Objects.equals(uris.getFirst(), "/events")) {
+    if (uris != null && uris.size() == 1 && "/events".equals(uris.get(0)) && start == null && end == null) {
       dtos = statsRepository.getAllStatsForEventsWithoutTime();
-    } else if (uris.size() == 1 && "/events".equals(uris.get(0))) {
+    } else if (uris != null && uris.size() == 1 && "/events".equals(uris.get(0))) {
       dtos = unique
               ? statsRepository.getStatsUniqueForAllEvents(startDate, endDate)
               : statsRepository.getStatsForAllEvents(startDate, endDate);

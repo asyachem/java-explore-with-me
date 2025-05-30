@@ -40,8 +40,7 @@ public class CompilationService {
         }
 
         Compilation saved = compilationRepository.save(compilation);
-        CompilationDto dto1 = compilationMapper.toDto(saved);
-        return dto1;
+        return compilationMapper.toDto(saved);
     }
 
     public void deleteCompilation(Long compId) {
