@@ -1,5 +1,6 @@
 package ru.practicum;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import ru.practicum.dto.dto.EndpointHitDto;
 import ru.practicum.dto.dto.ViewStatsDto;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +30,22 @@ public class Client {
   @Value("${stats.server.url}")
   private String statsServerUrl;
 
-  public void hit(EndpointHitDto hitDto) {
+  @Value("${app.name}")
+  private String appName;
+
+  private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+  public void hit(HttpServletRequest request) {
+    EndpointHitDto hit = new EndpointHitDto(
+            appName,
+            request.getRequestURI(),
+            request.getRemoteAddr(),
+            LocalDateTime.now().format(formatter)
+    );
+    sendHit(hit);
+  }
+
+  public void sendHit(EndpointHitDto hitDto) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
