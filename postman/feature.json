@@ -228,13 +228,42 @@
       "name": "Отклонение комментария админом",
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Создать новый комментарий",
+              "pm.sendRequest({",
+              "    url: pm.variables.get(\"baseUrl\") + \"/users/2/comments?eventId=1\",",
+              "    method: 'POST',",
+              "    header: {",
+              "        'Content-Type': 'application/json'",
+              "    },",
+              "    body: {",
+              "        mode: 'raw',",
+              "        raw: JSON.stringify({ text: \"Комментарий для отклонения\" })",
+              "    }",
+              "}, function (err, res) {",
+              "    if (err) {",
+              "        console.error('Ошибка при создании комментария', err);",
+              "    } else {",
+              "        var commentId = res.json().id;",
+              "        pm.collectionVariables.set(\"commentToRejectId\", commentId);",
+              "    }",
+              "});"
+            ]
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
+              "pm.test(\"Комментарий успешно отклонён\", function () {",
               "    pm.response.to.have.status(200);",
               "    pm.response.to.be.withBody;",
               "    pm.response.to.be.json;",
+              "    pm.expect(pm.response.json().status).to.eql(\"REJECTED\");",
+              "    pm.expect(pm.response.json().rejectionReason).to.eql(\"spam\");",
               "});"
             ],
             "type": "text/javascript"
@@ -251,20 +280,27 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/admin/comments/1/reject?reason=spam",
+          "raw": "{{baseUrl}}/admin/comments/{{commentToRejectId}}/reject?reason=spam",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "admin",
             "comments",
-            "1",
-            "reject?reason=spam"
+            "{{commentToRejectId}}",
+            "reject"
+          ],
+          "query": [
+            {
+              "key": "reason",
+              "value": "spam"
+            }
           ]
         }
       },
       "response": []
     },
+
     {
       "name": "Получение комментария по ID",
       "event": [
