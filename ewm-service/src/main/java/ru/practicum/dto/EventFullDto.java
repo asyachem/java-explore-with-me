@@ -22,4 +22,5 @@ public class EventFullDto {
     private CategoryDto category;
     private int views;
     private int confirmedRequests;
+    private Integer commentsCount;
 }

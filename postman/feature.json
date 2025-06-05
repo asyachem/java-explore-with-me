@@ -1,0 +1,263 @@
+{
+  "info": {
+    "_postman_id": "0101af21-cb05-41b9-9041-ab9795e3b518",
+    "name": "Test EWM - Comments",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Создание нового комментария",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Отличное мероприятие!\",\n  \"eventId\": 1\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий создан\", function () {",
+            "  pm.response.to.have.status(201);",
+            "  pm.response.to.be.withBody;",
+            "  pm.response.to.be.json;",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Создание комментария с пустым текстом",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"\",\n  \"eventId\": 1\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Ошибка 400 при пустом комментарии\", function () {",
+            "  pm.response.to.have.status(400);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Получение всех комментариев пользователя",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/users/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Получены комментарии пользователя\", function () {",
+            "  pm.response.to.have.status(200);",
+            "  pm.response.to.be.json;",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Получение комментариев события",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/events/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "1", "comments"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарии события получены\", function () {",
+            "  pm.response.to.have.status(200);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Одобрение комментария админом",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/admin/comments/1/approve",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "comments", "1", "approve"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий одобрен\", function () {",
+            "  pm.response.to.have.status(200);",
+            "  pm.expect(pm.response.json().status).to.eql(\"APPROVED\");",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Отклонение комментария админом",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.sendRequest({",
+              "  url: pm.variables.get(\"baseUrl\") + \"/users/2/comments\",",
+              "  method: 'POST',",
+              "  header: { 'Content-Type': 'application/json' },",
+              "  body: {",
+              "    mode: 'raw',",
+              "    raw: JSON.stringify({ text: \"Комментарий для отклонения\", eventId: 1 })",
+              "  }",
+              "}, function (err, res) {",
+              "  if (!err && res.code === 201) {",
+              "    var id = res.json().id;",
+              "    pm.collectionVariables.set(\"commentToRejectId\", id);",
+              "  } else {",
+              "    console.error(\"Ошибка при создании комментария\", err || res);",
+              "  }",
+              "});"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Комментарий отклонён\", function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.response.to.be.json;",
+              "  pm.expect(pm.response.json().status).to.eql(\"REJECTED\");",
+              "  pm.expect(pm.response.json().rejectionReason).to.eql(\"spam\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/comments/{{commentToRejectId}}/reject",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "comments",
+            "{{commentToRejectId}}",
+            "reject"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"spam\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Получение комментария по ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/events/1/comments/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "1", "comments", "1"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий по ID получен\", function () {",
+            "  pm.response.to.have.status(200);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Удаление своего комментария",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/users/1/comments/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments", "1"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий удалён\", function () {",
+            "  pm.response.to.have.status(204);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}
