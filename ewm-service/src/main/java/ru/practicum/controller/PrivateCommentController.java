@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.dto.UpdateCommentDto;
 import ru.practicum.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,15 +21,14 @@ public class PrivateCommentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto addComment(@PathVariable Long userId,
-                                    @RequestParam Long eventId,
                                     @RequestBody @Valid NewCommentDto dto) {
-        return commentService.addComment(userId, eventId, dto);
+        return commentService.addComment(userId, dto);
     }
 
     @PatchMapping("/{commentId}")
     public CommentDto updateComment(@PathVariable Long userId,
                                     @PathVariable Long commentId,
-                                    @RequestBody @Valid NewCommentDto dto) {
+                                    @RequestBody @Valid UpdateCommentDto dto) {
         return commentService.updateComment(userId, commentId, dto);
     }
 

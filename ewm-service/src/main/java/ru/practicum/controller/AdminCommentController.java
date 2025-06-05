@@ -3,6 +3,7 @@ package ru.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.CommentDto;
+import ru.practicum.dto.RejectReasonDto;
 import ru.practicum.service.CommentService;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class AdminCommentController {
 
     // Отклонить комментарий (с причиной)
     @PatchMapping("/{id}/reject")
-    public CommentDto reject(@PathVariable Long id, @RequestParam String reason) {
-        return commentService.rejectComment(id, reason);
+    public CommentDto reject(@PathVariable Long id, @RequestBody RejectReasonDto rejectReason) {
+        return commentService.rejectComment(id, rejectReason.getReason());
     }
 }

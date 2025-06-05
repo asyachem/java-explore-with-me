@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.NewCommentDto;
+import ru.practicum.dto.UpdateCommentDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CommentMapper;
@@ -48,31 +49,23 @@ public class CommentService {
         return commentMapper.toDto(comment);
     }
 
-    public CommentDto addComment(Long userId, Long eventId, NewCommentDto newCommentDto) {
+    public CommentDto addComment(Long userId, NewCommentDto newCommentDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        Event event = eventRepository.findById(eventId)
+        Event event = eventRepository.findById(newCommentDto.getEventId())
                 .orElseThrow(() -> new NotFoundException("Событие не найдено"));
 
-        Comment comment = new Comment();
-        comment.setText(newCommentDto.getText());
-        comment.setAuthor(user);
-        comment.setEvent(event);
-        comment.setStatus(CommentStatus.PENDING);
-        comment.setCreatedAt(LocalDateTime.now());
-        comment.setUpdatedAt(LocalDateTime.now());
-
-        return commentMapper.toDto(commentRepository.save(comment));
+        return commentMapper.toDto(commentRepository.save(commentMapper.fromDtoWithContext(newCommentDto, user, event)));
     }
 
-    public CommentDto updateComment(Long userId, Long commentId, NewCommentDto newCommentDto) {
+    public CommentDto updateComment(Long userId, Long commentId, UpdateCommentDto updateDto) {
         Comment comment = getCommentOrThrow(commentId);
 
         if (!comment.getAuthor().getId().equals(userId)) {
             throw new ConflictException("Пользователь не является автором комментария");
         }
 
-        comment.setText(newCommentDto.getText());
+        comment.setText(updateDto.getText());
         comment.setStatus(CommentStatus.PENDING);
         comment.setUpdatedAt(LocalDateTime.now());
 

@@ -7,222 +7,132 @@
   "item": [
     {
       "name": "Создание нового комментария",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 201 и данные в формате json\", function () {",
-              "    pm.response.to.have.status(201);",
-              "    pm.response.to.be.withBody;",
-              "    pm.response.to.be.json;",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/1/comments?eventId=1",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "1",
-            "comments?eventId=1"
-          ]
-        },
+        "header": [{ "key": "Accept", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"text\": \"cool!\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Создание комментария пустой текст",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 400 и данные в формате json\", function () {",
-              "    pm.response.to.have.status(400);",
-              "    pm.response.to.be.withBody;",
-              "    pm.response.to.be.json;",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/1/comments?eventId=1",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "1",
-            "comments?eventId=1"
-          ]
+          "raw": "{\n  \"text\": \"Отличное мероприятие!\",\n  \"eventId\": 1\n}",
+          "options": { "raw": { "language": "json" } }
         },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"text\": \"\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Получение всех своих комментариев",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
-              "    pm.response.to.have.status(200);",
-              "    pm.response.to.be.withBody;",
-              "    pm.response.to.be.json;",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
         "url": {
           "raw": "{{baseUrl}}/users/1/comments",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "1",
-            "comments"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments"]
         }
       },
-      "response": []
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий создан\", function () {",
+            "  pm.response.to.have.status(201);",
+            "  pm.response.to.be.withBody;",
+            "  pm.response.to.be.json;",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
     },
     {
-      "name": "Получение всех комментариев события",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
-              "    pm.response.to.have.status(200);",
-              "    pm.response.to.be.withBody;",
-              "    pm.response.to.be.json;",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
+      "name": "Создание комментария с пустым текстом",
       "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"\",\n  \"eventId\": 1\n}",
+          "options": { "raw": { "language": "json" } }
+        },
         "url": {
-          "raw": "{{baseUrl}}/events/1/comments",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "events",
-            "1",
-            "comments"
-          ]
+          "raw": "{{baseUrl}}/users/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments"]
         }
       },
-      "response": []
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Ошибка 400 при пустом комментарии\", function () {",
+            "  pm.response.to.have.status(400);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Получение всех комментариев пользователя",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/users/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Получены комментарии пользователя\", function () {",
+            "  pm.response.to.have.status(200);",
+            "  pm.response.to.be.json;",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
+    },
+    {
+      "name": "Получение комментариев события",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/events/1/comments",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "1", "comments"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарии события получены\", function () {",
+            "  pm.response.to.have.status(200);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
     },
     {
       "name": "Одобрение комментария админом",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
-              "    pm.response.to.have.status(200);",
-              "    pm.response.to.be.withBody;",
-              "    pm.response.to.be.json;",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
       "request": {
         "method": "PATCH",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
+        "header": [{ "key": "Accept", "value": "application/json" }],
         "url": {
           "raw": "{{baseUrl}}/admin/comments/1/approve",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "admin",
-            "comments",
-            "1",
-            "approve"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "comments", "1", "approve"]
         }
       },
-      "response": []
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий одобрен\", function () {",
+            "  pm.response.to.have.status(200);",
+            "  pm.expect(pm.response.json().status).to.eql(\"APPROVED\");",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
     },
     {
       "name": "Отклонение комментария админом",
@@ -232,24 +142,21 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "// Создать новый комментарий",
               "pm.sendRequest({",
-              "    url: pm.variables.get(\"baseUrl\") + \"/users/2/comments?eventId=1\",",
-              "    method: 'POST',",
-              "    header: {",
-              "        'Content-Type': 'application/json'",
-              "    },",
-              "    body: {",
-              "        mode: 'raw',",
-              "        raw: JSON.stringify({ text: \"Комментарий для отклонения\" })",
-              "    }",
+              "  url: pm.variables.get(\"baseUrl\") + \"/users/2/comments\",",
+              "  method: 'POST',",
+              "  header: { 'Content-Type': 'application/json' },",
+              "  body: {",
+              "    mode: 'raw',",
+              "    raw: JSON.stringify({ text: \"Комментарий для отклонения\", eventId: 1 })",
+              "  }",
               "}, function (err, res) {",
-              "    if (err) {",
-              "        console.error('Ошибка при создании комментария', err);",
-              "    } else {",
-              "        var commentId = res.json().id;",
-              "        pm.collectionVariables.set(\"commentToRejectId\", commentId);",
-              "    }",
+              "  if (!err && res.code === 201) {",
+              "    var id = res.json().id;",
+              "    pm.collectionVariables.set(\"commentToRejectId\", id);",
+              "  } else {",
+              "    console.error(\"Ошибка при создании комментария\", err || res);",
+              "  }",
               "});"
             ]
           }
@@ -257,16 +164,15 @@
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
-              "pm.test(\"Комментарий успешно отклонён\", function () {",
-              "    pm.response.to.have.status(200);",
-              "    pm.response.to.be.withBody;",
-              "    pm.response.to.be.json;",
-              "    pm.expect(pm.response.json().status).to.eql(\"REJECTED\");",
-              "    pm.expect(pm.response.json().rejectionReason).to.eql(\"spam\");",
+              "pm.test(\"Комментарий отклонён\", function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.response.to.be.json;",
+              "  pm.expect(pm.response.json().status).to.eql(\"REJECTED\");",
+              "  pm.expect(pm.response.json().rejectionReason).to.eql(\"spam\");",
               "});"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ],
@@ -274,13 +180,16 @@
         "method": "PATCH",
         "header": [
           {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
             "key": "Accept",
-            "value": "application/json",
-            "type": "text"
+            "value": "application/json"
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/admin/comments/{{commentToRejectId}}/reject?reason=spam",
+          "raw": "{{baseUrl}}/admin/comments/{{commentToRejectId}}/reject",
           "host": [
             "{{baseUrl}}"
           ],
@@ -289,97 +198,60 @@
             "comments",
             "{{commentToRejectId}}",
             "reject"
-          ],
-          "query": [
-            {
-              "key": "reason",
-              "value": "spam"
-            }
           ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"spam\"\n}"
         }
       },
       "response": []
     },
-
     {
       "name": "Получение комментария по ID",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
-              "    pm.response.to.have.status(200);",
-              "    pm.response.to.be.withBody;",
-              "    pm.response.to.be.json;",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
       "request": {
         "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
+        "header": [{ "key": "Accept", "value": "application/json" }],
         "url": {
           "raw": "{{baseUrl}}/events/1/comments/1",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "events",
-            "1",
-            "comments",
-            "1"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "1", "comments", "1"]
         }
       },
-      "response": []
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий по ID получен\", function () {",
+            "  pm.response.to.have.status(200);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
     },
     {
       "name": "Удаление своего комментария",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Ответ должен содержать код статуса 204\", function () {",
-              "    pm.response.to.have.status(204);",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
       "request": {
         "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
+        "header": [{ "key": "Accept", "value": "application/json" }],
         "url": {
           "raw": "{{baseUrl}}/users/1/comments/1",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "users",
-            "1",
-            "comments",
-            "1"
-          ]
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "1", "comments", "1"]
         }
       },
-      "response": []
+      "event": [{
+        "listen": "test",
+        "script": {
+          "exec": [
+            "pm.test(\"Комментарий удалён\", function () {",
+            "  pm.response.to.have.status(204);",
+            "});"
+          ],
+          "type": "text/javascript"
+        }
+      }]
     }
   ],
   "variable": [

@@ -1,6 +1,5 @@
 package ru.practicum.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.Client;
 import ru.practicum.dto.*;
 import ru.practicum.dto.dto.ViewStatsDto;
+import ru.practicum.enums.CommentStatus;
 import ru.practicum.enums.EventState;
 import ru.practicum.enums.RequestStatus;
 import ru.practicum.exception.BadRequestException;
@@ -35,6 +35,7 @@ public class EventService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
+    private final CommentRepository commentRepository;
     private final EventMapper eventMapper;
     private final Client statClient;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -282,7 +283,7 @@ public class EventService {
 
     public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid,
                                                String rangeStart, String rangeEnd, Boolean onlyAvailable,
-                                               String sort, int from, int size, HttpServletRequest request) {
+                                               String sort, int from, int size) {
 
         Pageable pageable = PageRequest.of(from / size, size, getSort(sort));
 
@@ -305,6 +306,9 @@ public class EventService {
 
         Map<Long, Long> confirmedRequests = getConfirmedRequests(events);
 
+        List<Long> eventIds = events.stream().map(Event::getId).toList();
+        Map<Long, Long> commentsCountMap = commentRepository.countApprovedByEventIds(eventIds);
+
         List<ViewStatsDto> globalStats = statClient.getStats(
                 start.format(formatter),
                 LocalDateTime.now().format(formatter),
@@ -316,11 +320,10 @@ public class EventService {
 
         return events.stream()
                 .map(event -> {
-                    EventShortDto dto = eventMapper.toShortDto(event);
+                    int confirmed = confirmedRequests.getOrDefault(event.getId(), 0L).intValue();
+                    int commentsCount = commentsCountMap.getOrDefault(event.getId(), 0L).intValue();
 
-                    long confirmed = confirmedRequests.getOrDefault(event.getId(), 0L);
-                    dto.setConfirmedRequests((int) confirmed);
-
+                    int views = 0;
                     if (event.getPublishedOn() != null) {
                         List<ViewStatsDto> stats = statClient.getStats(
                                 event.getPublishedOn().format(formatter),
@@ -329,22 +332,26 @@ public class EventService {
                                 true
                         );
 
-                        long views = stats.stream()
+                        views = stats.stream()
                                 .filter(s -> ("/events/" + event.getId()).equals(s.getUri()))
                                 .findFirst()
                                 .map(ViewStatsDto::getHits)
-                                .orElse(0L);
-                        dto.setViews((int) (views + globalViews));
+                                .orElse(0L).intValue();
+                        views += (int) globalViews;
                     } else {
-                        dto.setViews((int) globalViews);
+                        views = (int) globalViews;
                     }
+
+                    EventShortDto dto = eventMapper.toShortDto(event, commentsCount);
+                    dto.setConfirmedRequests(confirmed);
+                    dto.setViews(views);
 
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
-    public EventFullDto getEventPublic(Long eventId, HttpServletRequest request) {
+    public EventFullDto getEventPublic(Long eventId) {
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Событие не опубликовано"));
 
@@ -360,7 +367,9 @@ public class EventService {
             event.setViews(0);
         }
 
-        return eventMapper.toFullDto(event);
+        int commentsCount = commentRepository.countByEventIdAndStatus(eventId, CommentStatus.APPROVED);
+
+        return eventMapper.toFullDto(event, commentsCount);
     }
 
     private Sort getSort(String sort) {

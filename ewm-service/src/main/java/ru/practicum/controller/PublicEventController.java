@@ -34,7 +34,7 @@ public class PublicEventController {
         statsClient.hit(request);
 
         return eventService.getEventsPublic(text, categories, paid, rangeStart, rangeEnd,
-                onlyAvailable, sort, from, size, request);
+                onlyAvailable, sort, from, size);
     }
 
     @GetMapping("/{id}")
@@ -42,6 +42,6 @@ public class PublicEventController {
 
         statsClient.hit(request);
 
-        return eventService.getEventPublic(id, request);
+        return eventService.getEventPublic(id);
     }
 }
