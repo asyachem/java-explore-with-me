@@ -301,51 +301,35 @@ public class EventService {
         }
 
         Specification<Event> spec = EventSpecifications.publicEvents(text, categories, paid, start, end, onlyAvailable);
-
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
 
         Map<Long, Long> confirmedRequests = getConfirmedRequests(events);
-
         List<Long> eventIds = events.stream().map(Event::getId).toList();
-        Map<Long, Long> commentsCountMap = commentRepository.countApprovedByEventIds(eventIds);
+        Map<Long, Long> commentsCount = commentRepository.countApprovedByEventIds(eventIds);
 
-        List<ViewStatsDto> globalStats = statClient.getStats(
+        List<String> uris = events.stream()
+                .map(event -> "/events/" + event.getId())
+                .toList();
+
+        List<ViewStatsDto> stats = statClient.getStats(
                 start.format(formatter),
                 LocalDateTime.now().format(formatter),
-                List.of("/events"),
-                false
+                uris,
+                true
         );
 
-        long globalViews = globalStats.isEmpty() ? 0 : globalStats.get(0).getHits();
+        Map<String, Long> viewsMap = stats.stream()
+                .collect(Collectors.toMap(ViewStatsDto::getUri, ViewStatsDto::getHits));
 
         return events.stream()
                 .map(event -> {
                     int confirmed = confirmedRequests.getOrDefault(event.getId(), 0L).intValue();
-                    int commentsCount = commentsCountMap.getOrDefault(event.getId(), 0L).intValue();
+                    int commentCount = commentsCount.getOrDefault(event.getId(), 0L).intValue();
+                    int views = viewsMap.getOrDefault("/events/" + event.getId(), 0L).intValue();
 
-                    int views = 0;
-                    if (event.getPublishedOn() != null) {
-                        List<ViewStatsDto> stats = statClient.getStats(
-                                event.getPublishedOn().format(formatter),
-                                LocalDateTime.now().format(formatter),
-                                List.of("/events/" + event.getId()),
-                                true
-                        );
-
-                        views = stats.stream()
-                                .filter(s -> ("/events/" + event.getId()).equals(s.getUri()))
-                                .findFirst()
-                                .map(ViewStatsDto::getHits)
-                                .orElse(0L).intValue();
-                        views += (int) globalViews;
-                    } else {
-                        views = (int) globalViews;
-                    }
-
-                    EventShortDto dto = eventMapper.toShortDto(event, commentsCount);
+                    EventShortDto dto = eventMapper.toShortDto(event, commentCount);
                     dto.setConfirmedRequests(confirmed);
                     dto.setViews(views);
-
                     return dto;
                 })
                 .collect(Collectors.toList());
