@@ -54,6 +54,12 @@ public class EventMapper {
         return dto;
     }
 
+    public EventFullDto toFullDto(Event event, int commentsCount) {
+        EventFullDto dto = toFullDto(event);
+        dto.setCommentsCount(commentsCount);
+        return dto;
+    }
+
     public EventShortDto toShortDto(Event event) {
         EventShortDto dto = new EventShortDto();
         dto.setId(event.getId());
@@ -65,6 +71,12 @@ public class EventMapper {
         dto.setCategory(categoryMapper.toDto(event.getCategory()));
         dto.setViews(event.getViews());
         dto.setConfirmedRequests(event.getConfirmedRequests());
+        return dto;
+    }
+
+    public EventShortDto toShortDto(Event event, int commentsCount) {
+        EventShortDto dto = toShortDto(event);
+        dto.setCommentsCount(commentsCount);
         return dto;
     }
 
